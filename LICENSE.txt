@@ -1,0 +1,27 @@
+Commercial License for upinnsecretsandroid
+
+Copyright (c) 2025 upinn.tech. All rights reserved.
+
+This software and associated documentation files (the "Software") are the proprietary property of upinn.tech and are protected by copyright laws and international treaties.
+
+Permission is hereby granted to the licensee to use this Software solely for **internal, commercial use** in accordance with the terms of a commercial agreement with upinn.tech.
+
+## Restrictions
+
+- The Software may not be **copied, modified, distributed, sublicensed, or reverse-engineered** without the prior written permission of upinn.tech.
+- You may not create derivative works of the Software.
+- You may not make the Software publicly available, open source, or share it with third parties.
+- Use of this Software **without a valid commercial license** from upinn.tech is strictly prohibited.
+
+## No Warranty
+
+The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to warranties of merchantability or fitness for a particular purpose. In no event shall upinn.tech be liable for any claim, damages, or other liability arising from the use of the Software.
+
+## Contact
+
+To obtain a commercial license or inquire about custom terms, please contact:
+
+**Email**: support@upinn.tech  
+**Website**: https://upinn.tech
+
+Unauthorized use of this Software will be prosecuted to the fullest extent of the law.
