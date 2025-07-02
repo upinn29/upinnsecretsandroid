@@ -60,7 +60,7 @@ afterEvaluate {
                 pom {
                     name.set("Upinn Secrets Android")
                     description.set("Librería para manejo seguro de secretos en Android")
-                    url.set("https://github.com/upinn29/uppinsecretsandroid")
+                    url.set("https://github.com/upinn29/upinnsecretsandroid.git")
                     licenses {
                         license {
                             name.set("Apache-2.0")
@@ -74,9 +74,9 @@ afterEvaluate {
                         }
                     }
                     scm {
-                        connection.set("scm:git:github.com/upinn29/uppinsecretsandroid.git")
-                        developerConnection.set("scm:git:ssh://github.com/upinn29/uppinsecretsandroid.git")
-                        url.set("https://github.com/upinn29/uppinsecretsandroid/tree/main")
+                        connection.set("scm:git:github.com/upinn29/upinnsecretsandroid.git")
+                        developerConnection.set("scm:git:ssh://github.com/upinn29/upinnsecretsandroid.git")
+                        url.set("https://github.com/upinn29/upinnsecretsandroid/tree/main")
                     }
                 }
             }
@@ -85,7 +85,7 @@ afterEvaluate {
         repositories {
             maven {
                 name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/upinn29/uppinsecretsandroid")
+                url = uri("https://maven.pkg.github.com/upinn29/upinnsecretsandroid")
                 credentials {
                     username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME")
                     password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
