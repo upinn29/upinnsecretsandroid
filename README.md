@@ -11,7 +11,7 @@
   <a href="https://github.com/upinn29/upinnsecretsandroid/stargazers">
     <img alt="Stars" src="https://img.shields.io/github/stars/upinn29/upinnsecretsandroid?style=flat-square" />
   </a>
-  <a href="https://github.com/upinn29/upinnsecretsandroid/blob/main/LICENSE.txt">
+  <a href="https://github.com/upinn29/upinnsecretsandroid/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/github/license/upinn29/upinnsecretsandroid?style=flat-square" />
   </a>
 
