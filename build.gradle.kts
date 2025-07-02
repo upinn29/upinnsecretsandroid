@@ -63,8 +63,9 @@ afterEvaluate {
                     url.set("https://github.com/upinn29/upinnsecretsandroid.git")
                     licenses {
                         license {
-                            name.set("Apache-2.0")
-                            url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                            name.set("Commercial License - upinn.tech")
+                            url.set("https://github.com/upinn29/upinnsecretsandroid/blob/main/LICENSE")
+                            distribution.set("repo")
                         }
                     }
                     developers {
