@@ -17,7 +17,7 @@
 
 </p>
 
-Android library for consuming protected secrets from the [Upinn](https://upinn.tech). It offers secure on-device authentication and retrieval of encrypted secrets from your backend using a native Rust-based integration.
+Android library for consuming protected secrets from the [Upinn](https://upinn.tech). It offers secure on-device authentication and retrieval of encrypted secrets.
 
 ---
 
