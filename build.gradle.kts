@@ -36,9 +36,7 @@ android {
 dependencies {
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation("net.java.dev.jna:jna:5.12.0@aar")
+    implementation("net.java.dev.jna:jna:5.18.1@aar")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -53,7 +51,7 @@ afterEvaluate {
             register<MavenPublication>("release") {
                 groupId = "upinn.tech"
                 artifactId = "upinnsecretsandroid"
-                version = "1.0.5"
+                version = "1.0.7"
 
                 from(components["release"])
 

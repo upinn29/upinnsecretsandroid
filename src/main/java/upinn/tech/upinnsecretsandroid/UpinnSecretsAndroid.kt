@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import upinn.tech.upinnsecretsandroid.PluginException
 import java.io.InputStream
+import kotlin.text.removeSuffix
 
 class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Context, private val fileName: String){
     private var secrets: Secrets = Secrets(isDebug,context.getDatabasePath("secrets.db").absolutePath)
@@ -40,6 +41,7 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
             file_name_global = fileName.removeSuffix(".bin")
             val fileBytes = readFileFromRaw(file_name_global) ?: throw PluginException.ErrorCode(1010)
             file_bytes_global = fileBytes.map { it.toUByte() }
+            Log.d(TAG,deviceInfo.packageName)
             val args = SecretsArgs(
                 fileBytes = file_bytes_global,
                 fileName = file_name_global,
@@ -76,7 +78,7 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
             if(file_bytes_global==null) {
                 throw PluginException.ErrorCode(1010)
             }
-            val nonNullVersion = version ?: ""
+            val nonNullVersion = version ?: "1"
             val args = SecretsArgs(
                 fileBytes = file_bytes_global,
                 fileName = file_name_global,
