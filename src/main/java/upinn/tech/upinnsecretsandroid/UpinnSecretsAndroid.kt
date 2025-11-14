@@ -113,7 +113,8 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
             )
 
         } catch (e: Exception) {
-            Log.d(TAG, e.message.toString())
+            val msg = e.message ?: "Unknown error"
+            Log.d(TAG, msg)
             throw when (e) {
                 is PluginException -> e
                 else -> PluginException.ErrorCode(5000)
