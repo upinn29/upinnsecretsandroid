@@ -2,6 +2,8 @@ package upinn.tech.upinnsecretsandroid
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import upinn.tech.upinnsecretsandroid.PluginException
 import java.io.InputStream
 import kotlin.text.removeSuffix
@@ -36,7 +38,7 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
     }
 
     @Throws(PluginException::class)
-    fun login(): Long {
+    fun login(): Long{
         try {
             file_name_global = fileName.removeSuffix(".bin")
             val fileBytes = readFileFromRaw(file_name_global) ?: throw PluginException.ErrorCode(1010)
@@ -72,13 +74,16 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
         }
     }
 
+    /** -------------------------- GET SECRET (ASYNC) -------------------------- **/
     @Throws(PluginException::class)
-    fun get_secret(variable: String, version:String?): SecretsResponse{
+    suspend fun get_secret(variable: String, version: String?): SecretsResponse {
         try {
-            if(file_bytes_global==null) {
+            if (!::file_bytes_global.isInitialized) {
                 throw PluginException.ErrorCode(1010)
             }
+
             val nonNullVersion = version ?: "1"
+
             val args = SecretsArgs(
                 fileBytes = file_bytes_global,
                 fileName = file_name_global,
@@ -94,18 +99,23 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
                 variable = variable,
                 version = nonNullVersion
             )
+            Log.d(TAG,args.toString())
+            // 🔥 AHORA ES ASYNC: Rust expone secrets.getSecret(args) como Future
             val resGetSecrets = secrets.getSecret(args)
-            if (resGetSecrets.statusCode != 200L) { // Asumiendo que 0 es éxito
+
+            if (resGetSecrets.statusCode != 200L) {
                 throw PluginException.ErrorCode(resGetSecrets.statusCode)
             }
+
             return SecretsResponse(
                 secretValue = resGetSecrets.secretValue,
                 statusCode = resGetSecrets.statusCode
             )
-        }catch (e: Exception){
-            Log.d(TAG,e.message.toString());
+
+        } catch (e: Exception) {
+            Log.d(TAG, e.message.toString())
             throw when (e) {
-                is PluginException -> e // Ya es una PluginException
+                is PluginException -> e
                 else -> PluginException.ErrorCode(5000)
             }
         }
