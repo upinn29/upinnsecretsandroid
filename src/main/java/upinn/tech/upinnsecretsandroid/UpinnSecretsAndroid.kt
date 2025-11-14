@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -161,6 +162,34 @@ class SecretsWrapper(private val secretsRef: UpinnSecretsAndroid) {
         }
         return future
     }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun getSecretsParallel(variables: List<String>): CompletableFuture<List<SecretResponseWrapper>> {
+        val future = CompletableFuture<List<SecretResponseWrapper>>()
+
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val deferreds = variables.map { variable ->
+                    async {
+                        try {
+                            val res = secretsRef.get_secret(variable, null)
+                            if (res.statusCode == 200L) SecretResponseWrapper.Success(res)
+                            else SecretResponseWrapper.Error(res.statusCode, "Error retrieving secret")
+                        } catch (e: Exception) {
+                            SecretResponseWrapper.Error(5000, e.message ?: "Unknown error")
+                        }
+                    }
+                }
+                val results = deferreds.awaitAll()
+                future.complete(results)
+            } catch (e: Exception) {
+                future.completeExceptionally(e)
+            }
+        }
+
+        return future
+    }
+
 }
 
 
