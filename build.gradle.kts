@@ -51,7 +51,7 @@ afterEvaluate {
             register<MavenPublication>("release") {
                 groupId = "upinn.tech"
                 artifactId = "upinnsecretsandroid"
-                version = "1.1.2"
+                version = "1.1.3"
 
                 from(components["release"])
 
