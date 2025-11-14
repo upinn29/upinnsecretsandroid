@@ -2,7 +2,12 @@ package upinn.tech.upinnsecretsandroid
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import upinn.tech.upinnsecretsandroid.PluginException
 import java.io.InputStream
@@ -122,6 +127,44 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
             }
         }
     }
+}
 
+class SecretsWrapper(private val secretsRef: UpinnSecretsAndroid) {
+
+    fun getSecretBlocking(variable: String, version: String?): SecretsResponse {
+        return runBlocking {
+            secretsRef.get_secret(variable, version)
+        }
+    }
+
+    fun getSecretsParallel(variables: List<String>, iterations: Int = 100) {
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+        coroutineScope.launch {
+            repeat(iterations) { iteration ->
+                val deferredCalls = variables.map { variable ->
+                    async {
+                        try {
+                            val result = secretsRef.get_secret(variable, null)
+                            if (result.statusCode == 200L) {
+                                println("$variable -> ${result.secretValue}")
+                                "$variable = ${result.secretValue}"
+                            } else {
+                                "$variable Error: ${result.statusCode}"
+                            }
+                        } catch (e: Exception) {
+                            "$variable Exception: ${e.message}"
+                        }
+                    }
+                }
+                val resultList = deferredCalls.awaitAll()
+                println("Iteración $iteration completada: $resultList")
+            }
+
+            withContext(Dispatchers.Main) {
+                // UI toast si estás en Android
+                // Toast.makeText(context, "Todas las iteraciones completadas", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 }
 
