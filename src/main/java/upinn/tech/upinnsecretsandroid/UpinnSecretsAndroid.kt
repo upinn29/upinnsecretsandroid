@@ -1,7 +1,9 @@
 package upinn.tech.upinnsecretsandroid
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -11,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import upinn.tech.upinnsecretsandroid.PluginException
 import java.io.InputStream
+import java.util.concurrent.CompletableFuture
 import kotlin.text.removeSuffix
 
 class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Context, private val fileName: String){
@@ -129,42 +132,35 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
     }
 }
 
+sealed class SecretResponseWrapper {
+    data class Success(val secret: SecretsResponse) : SecretResponseWrapper()
+    data class Error(val code: Long, val message: String) : SecretResponseWrapper()
+}
+
 class SecretsWrapper(private val secretsRef: UpinnSecretsAndroid) {
 
-    fun getSecretBlocking(variable: String, version: String?): SecretsResponse {
-        return runBlocking {
-            secretsRef.get_secret(variable, version)
-        }
-    }
+    // Llama a tu suspend fun y devuelve un CompletableFuture
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun getSecretAsync(variable: String, version: String?): CompletableFuture<SecretResponseWrapper> {
+        val future = CompletableFuture<SecretResponseWrapper>()
 
-    fun getSecretsParallel(variables: List<String>, iterations: Int = 100) {
-        val coroutineScope = CoroutineScope(Dispatchers.IO)
-        coroutineScope.launch {
-            repeat(iterations) { iteration ->
-                val deferredCalls = variables.map { variable ->
-                    async {
-                        try {
-                            val result = secretsRef.get_secret(variable, null)
-                            if (result.statusCode == 200L) {
-                                println("$variable -> ${result.secretValue}")
-                                "$variable = ${result.secretValue}"
-                            } else {
-                                "$variable Error: ${result.statusCode}"
-                            }
-                        } catch (e: Exception) {
-                            "$variable Exception: ${e.message}"
-                        }
-                    }
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                // Llamada a tu función suspend original
+                val res = secretsRef.get_secret(variable, version)
+
+                // Chequea statusCode y envuelve en SecretResponse
+                if (res.statusCode == 200L) {
+                    future.complete(SecretResponseWrapper.Success(res))
+                } else {
+                    future.complete(SecretResponseWrapper.Error(res.statusCode, "Error retrieving secret"))
                 }
-                val resultList = deferredCalls.awaitAll()
-                println("Iteración $iteration completada: $resultList")
-            }
-
-            withContext(Dispatchers.Main) {
-                // UI toast si estás en Android
-                // Toast.makeText(context, "Todas las iteraciones completadas", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                future.complete(SecretResponseWrapper.Error(5000, e.message ?: "Unknown error"))
             }
         }
+        return future
     }
 }
+
 
