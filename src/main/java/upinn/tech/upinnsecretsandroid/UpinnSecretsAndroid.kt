@@ -163,23 +163,35 @@ class SecretsWrapper(private val secretsRef: UpinnSecretsAndroid) {
         return future
     }
 
+    data class SecretRequest(
+        val variable: String,
+        val version: String? = null
+    )
+
     @RequiresApi(Build.VERSION_CODES.N)
-    fun getSecretsParallel(variables: List<String>): CompletableFuture<List<SecretResponseWrapper>> {
+    fun getSecretsParallel(requests: List<SecretRequest>, defaultVersion: String = "1"): CompletableFuture<List<SecretResponseWrapper>> {
         val future = CompletableFuture<List<SecretResponseWrapper>>()
 
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                val deferreds = variables.map { variable ->
+                // Mapeamos cada request a una coroutine async
+                val deferreds = requests.map { req ->
                     async {
                         try {
-                            val res = secretsRef.get_secret(variable, null)
-                            if (res.statusCode == 200L) SecretResponseWrapper.Success(res)
-                            else SecretResponseWrapper.Error(res.statusCode, "Error retrieving secret")
+                            // Usamos version del objeto o default
+                            val versionToUse = req.version ?: defaultVersion
+                            val res = secretsRef.get_secret(req.variable, versionToUse)
+                            if (res.statusCode == 200L) {
+                                SecretResponseWrapper.Success(res)
+                            } else {
+                                SecretResponseWrapper.Error(res.statusCode, "Error retrieving secret")
+                            }
                         } catch (e: Exception) {
                             SecretResponseWrapper.Error(5000, e.message ?: "Unknown error")
                         }
                     }
                 }
+
                 val results = deferreds.awaitAll()
                 future.complete(results)
             } catch (e: Exception) {
