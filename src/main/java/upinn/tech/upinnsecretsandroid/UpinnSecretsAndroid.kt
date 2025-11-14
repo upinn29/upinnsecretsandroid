@@ -74,9 +74,10 @@ class UpinnSecretsAndroid(private val isDebug: Boolean, private val context: Con
         }
     }
 
+
     /** -------------------------- GET SECRET (ASYNC) -------------------------- **/
     @Throws(PluginException::class)
-    suspend fun get_secret(variable: String, version: String?): SecretsResponse {
+    suspend fun get_secreto(variable: String, version: String?): SecretsResponse {
         try {
             if (!::file_bytes_global.isInitialized) {
                 throw PluginException.ErrorCode(1010)
