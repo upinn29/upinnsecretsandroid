@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -169,18 +170,26 @@ class SecretsWrapper(private val secretsRef: UpinnSecretsAndroid) {
     )
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun getSecretsParallel(requests: List<SecretRequest>, defaultVersion: String = "1"): CompletableFuture<List<SecretResponseWrapper>> {
+    fun getSecretsParallel(
+        requests: List<SecretRequest>,
+        defaultVersion: String = "1"
+    ): CompletableFuture<List<SecretResponseWrapper>> {
+
         val future = CompletableFuture<List<SecretResponseWrapper>>()
 
-        GlobalScope.launch(Dispatchers.IO) {
+        // Un único scope dedicado al runtime de UniFFI/Rust
+        val job = SupervisorJob()
+        val scope = CoroutineScope(Dispatchers.IO + job)
+
+        scope.launch {
             try {
-                // Mapeamos cada request a una coroutine async
-                val deferreds = requests.map { req ->
-                    async {
+                // 🔥 Ejecutar cada request en paralelo, como tu Button
+                val deferred = requests.map { req ->
+                    async(Dispatchers.IO) {
                         try {
-                            // Usamos version del objeto o default
                             val versionToUse = req.version ?: defaultVersion
                             val res = secretsRef.get_secret(req.variable, versionToUse)
+
                             if (res.statusCode == 200L) {
                                 SecretResponseWrapper.Success(res)
                             } else {
@@ -192,8 +201,9 @@ class SecretsWrapper(private val secretsRef: UpinnSecretsAndroid) {
                     }
                 }
 
-                val results = deferreds.awaitAll()
+                val results = deferred.awaitAll()
                 future.complete(results)
+
             } catch (e: Exception) {
                 future.completeExceptionally(e)
             }
@@ -201,6 +211,7 @@ class SecretsWrapper(private val secretsRef: UpinnSecretsAndroid) {
 
         return future
     }
+
 
 }
 
